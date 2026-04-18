@@ -1,3 +1,5 @@
+# This is a multistage docker file where in the first stage we build the artifact and then in the second stage we copy the artifact and run it using nginx
+
 FROM node:14 AS web-build
 WORKDIR /usr/src/app
 COPY ./ ./client
@@ -7,6 +9,7 @@ RUN cd client && npm install && npm run build --prod
 FROM nginx:latest
 
 # Copy the build output to replace the default nginx contents.
+# So basically what this command does is, copy "/usr/src/app/client/dist/client/" from the web-build stage to "/usr/share/nginx/html" in the nginx image. This is where nginx serves the static files from.
 COPY --from=web-build /usr/src/app/client/dist/client/ /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 

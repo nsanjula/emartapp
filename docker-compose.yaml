@@ -3,10 +3,12 @@ version: "3.8"
 services:
   client:
     build:
-      context: ./client
+      context: ./client # Path to the dockerfile for the client service
     ports:
       - "4200:4200"
     container_name: client
+
+    # This section basically defines the startup order (based on dependency)
     depends_on:
       - api
       - webapi
@@ -16,6 +18,8 @@ services:
       context: ./nodeapi
     ports:
       - "5000:5000"
+
+    # Here it will restart the container automatically if it crashes or stops for any reason. This is useful for ensuring that the service is always available and can recover from unexpected failures. The "always" policy means that the container will be restarted regardless of the exit status, whether it exited with an error or not.
     restart: always
     container_name: api
     depends_on:
@@ -36,10 +40,14 @@ services:
     restart: always
     image: nginx:latest
     container_name: nginx
+
+    # Mapping configuration file for nginx. So basically, we are copying the default.conf file from the host machine to the container. This file contains the routing rules for the api and webapi services.
     volumes:
       - "./nginx/default.conf:/etc/nginx/conf.d/default.conf"
     ports:
       - "80:80"
+    depends_on:
+      - client
 
   emongo:
     image: mongo:4
